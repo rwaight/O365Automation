@@ -5,6 +5,7 @@
 # Version: 1.0
 # Comments: Enable mailbox auditing for use with
 #              the Phishing Intelligence Engine (PIE)
+#           PIE is available at:  https://github.com/LogRhythm-Labs/PIE
 # -----------------------------------------------------------------------------
 
 Start-Transcript $ENV:USERPROFILE\Desktop\Transcript_O365ExchangeAuditing_$(Get-Date -format 'yyyyMMdd-HHmmss').txt; Clear

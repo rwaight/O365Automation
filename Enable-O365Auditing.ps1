@@ -1,4 +1,4 @@
-﻿# -----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Script: Enable-O365Auditing.ps1
 # Author: Rob Waight
 # Created: 06/25/2018
@@ -23,8 +23,29 @@ $UserCredential = Import-Clixml -Path $CredentialsFile # Comment this line if en
 $O365Username=$UserCredential.UserName
 # Change the windows title to the username and opening the PSSession to Office 365
 Write-Host "Connecting to Office 365 as $O365Username`n"
-$host.ui.RawUI.WindowTitle = "PowerShell: O365: $O365Username"$Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://outlook.office365.com/powershell-liveid/ -Credential $UserCredential -Authentication Basic -AllowRedirection; Import-PSSession $Session# Check if Unified Audit Log Ingestion is enabled, set to enabled if it is not enabled$O365AuditConfig=Get-AdminAuditLogConfigIf($O365AuditConfig.UnifiedAuditLogIngestionEnabled -ne $true){    Write-Host "Enabling Unified Audit Log Ingestion" -ForegroundColor Yellow    Set-AdminAuditLogConfig -UnifiedAuditLogIngestionEnabled $true}If($O365AuditConfig.UnifiedAuditLogIngestionEnabled -eq $true){    Write-Host "Unified Audit Log Ingestion is already enabled!" -ForegroundColor Cyan}# Determine how many mailboxes existWrite-Host "Getting Mailbox Information..." -ForegroundColor Yellow
-$Mailboxes = Get-Mailbox -ResultSize Unlimited | Where-Object {$_.RecipientTypeDetails -ne "DiscoveryMailbox"}$MailboxCount=$Mailboxes.count$DatabaseCount = ($Mailboxes | Group-Object {$_.Database}).countWrite-Host "There are $MailboxCount mailboxes and $DatabaseCount mailbox databases in your environment." -ForegroundColor YellowWrite-Host "`nREMINDER: This script will automatically attempt to audit mailboxes where auditing is disabled!!`n" -ForegroundColor Yellow# Will mailbox searches be limited?$title = "Office 365 Exchange Auditing"
+$host.ui.RawUI.WindowTitle = "PowerShell: O365: $O365Username"
+$Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://outlook.office365.com/powershell-liveid/ -Credential $UserCredential -Authentication Basic -AllowRedirection; Import-PSSession $Session
+
+# Check if Unified Audit Log Ingestion is enabled, set to enabled if it is not enabled
+$O365AuditConfig=Get-AdminAuditLogConfig
+If($O365AuditConfig.UnifiedAuditLogIngestionEnabled -ne $true){
+    Write-Host "Enabling Unified Audit Log Ingestion" -ForegroundColor Yellow
+    Set-AdminAuditLogConfig -UnifiedAuditLogIngestionEnabled $true
+}
+If($O365AuditConfig.UnifiedAuditLogIngestionEnabled -eq $true){
+    Write-Host "Unified Audit Log Ingestion is already enabled!" -ForegroundColor Cyan
+}
+
+# Determine how many mailboxes exist
+Write-Host "Getting Mailbox Information..." -ForegroundColor Yellow
+$Mailboxes = Get-Mailbox -ResultSize Unlimited | Where-Object {$_.RecipientTypeDetails -ne "DiscoveryMailbox"}
+$MailboxCount=$Mailboxes.count
+$DatabaseCount = ($Mailboxes | Group-Object {$_.Database}).count
+Write-Host "There are $MailboxCount mailboxes and $DatabaseCount mailbox databases in your environment." -ForegroundColor Yellow
+Write-Host "`nREMINDER: This script will automatically attempt to audit mailboxes where auditing is disabled!!`n" -ForegroundColor Yellow
+
+# Will mailbox searches be limited?
+$title = "Office 365 Exchange Auditing"
 $resultsizemessage = "Do you want unlimited mailbox results? (Select No if you want to limit searches to 1000 mailboxes at a time)"
 $yes = New-Object System.Management.Automation.Host.ChoiceDescription "&Yes", "Yes"
 $no = New-Object System.Management.Automation.Host.ChoiceDescription "&No", "No"
